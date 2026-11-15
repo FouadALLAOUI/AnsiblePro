@@ -1,0 +1,59 @@
+Vagrant.configure("2") do |config|
+
+  # VM pour installer Packstack
+  config.vm.define "packstack-vm" do |agent|
+    agent.vm.box = "bento/centos-7"
+    agent.vm.hostname = "packstack-vm"
+
+    # IP privée pour accéder à Horizon depuis l'hôte
+    agent.vm.network "private_network", ip: "192.168.56.20"
+
+    agent.vm.provider "vmware_desktop" do |v|
+      v.memory = 12288   # 8192 minimum, 12-16 Go conseillé
+      v.cpus = 4
+      v.gui = true
+      v.vmx["virtualHW.version"] = "19"
+    end
+
+    # 1) Préparation du système (s'exécute au premier "vagrant up")
+    agent.vm.provision "shell", name: "prepare", inline: <<-SHELL
+      set -e
+
+      # CentOS 7 est EOL : pointer les dépôts vers le vault
+      sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-*.repo
+      sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+
+      yum update -y
+
+      # Packstack n'aime pas NetworkManager ni firewalld
+      systemctl disable --now firewalld || true
+      systemctl disable --now NetworkManager || true
+      systemctl enable --now network
+
+      # SELinux en mode permissif
+      setenforce 0 || true
+      sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+
+      # Nom d'hôte résolvable
+      echo "192.168.56.20 packstack-vm" >> /etc/hosts
+
+      # Dépôt OpenStack Train (dernière version pour CentOS 7) et Packstack
+      yum install -y centos-release-openstack-train
+      sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-OpenStack-train.repo
+      sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-OpenStack-train.repo
+      yum update -y
+      yum install -y openstack-packstack
+    SHELL
+
+    # 2) Installation de Packstack (manuelle car très longue, 20-60 min)
+    #agent.vm.provision "shell", name: "packstack", run: "never", inline: <<-SHELL
+    #  packstack --allinone \
+    #    --default-password=secret \
+    #    --nova-libvirt-virt-type=qemu \
+    #    --os-neutron-ovs-bridge-mappings=extnet:br-ex \
+    #    --os-neutron-ovs-bridge-interfaces=br-ex:eth1 \
+    #    --provision-demo=n
+    #SHELL
+  end
+
+end

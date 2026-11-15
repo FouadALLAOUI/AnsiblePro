@@ -1,0 +1,19 @@
+# List all the ports that are open on the machine
+---
+- name: List all the ports that are open on the machine
+  hosts: all
+  become: yes
+  become_method: sudo
+  
+  tasks:
+    - name: List all the ports that are open on the machine
+      shell: netstat -tuln
+      register: result
+      changed_when: false
+      failed_when: false
+      ignore_errors: yes
+    - name: Display the result
+      debug:
+        msg: "{{ result.stdout_lines }}"
+      when: result.stdout_lines is defined
+

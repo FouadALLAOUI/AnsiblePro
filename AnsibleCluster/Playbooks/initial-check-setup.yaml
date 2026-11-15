@@ -1,0 +1,49 @@
+---
+- name: Initial Setup Check
+  hosts: all
+  become: yes # Become to root user for package installation
+  become_method: sudo # Use sudo for privilege escalation
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      
+    - name: Install wget
+      apt:
+        name: wget
+        state: present
+
+    - name: Install net-tools
+      apt:
+        name: net-tools
+        state: present
+
+    - name: Install iputils-ping
+      apt:
+        name: iputils-ping
+        state: present
+        
+    - name: Install curl
+      apt:
+        name: curl
+        state: present
+        
+    - name: Verify wget installation
+      command: wget --version
+      register: wget_version
+      changed_when: false
+      
+    - name: Verify curl installation
+      command: curl --version
+      register: curl_version
+      changed_when: false
+      
+    - name: Display wget version
+      debug:
+        msg: "{{ wget_version.stdout_lines[0] }}"
+        
+    - name: Display curl version
+      debug:
+        msg: "{{ curl_version.stdout_lines[0] }}"

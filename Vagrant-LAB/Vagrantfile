@@ -1,0 +1,92 @@
+Vagrant.configure("2") do |config|
+  
+    # First VM - ubuntu-vm
+    config.vm.define "ubuntu-vm" do |ubuntu|
+      ubuntu.vm.box = "bento/ubuntu-22.04"
+      ubuntu.vm.hostname = "ubuntu-vm"
+      
+      ubuntu.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Provision script to install Ansible
+      ubuntu.vm.provision "shell", inline: <<-SHELL
+        apt update
+        apt install ansible -y
+      SHELL
+    end
+
+    # Third VM - jenkins-vm
+    config.vm.define "jenkins-vm" do |jenkins|
+      jenkins.vm.box = "bento/ubuntu-22.04"
+      jenkins.vm.hostname = "jenkins-vm"
+      
+      jenkins.vm.provider "vmware_desktop" do |v|
+        v.memory = 4096
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Add any specific provisioning for jenkins-vm here if needed
+      # jenkins.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+
+    # Third VM - sonaraube-vm
+    config.vm.define "sonaraube-vm" do |sonaraube|
+      sonaraube.vm.box = "bento/ubuntu-22.04"
+      sonaraube.vm.hostname = "sonaraube-vm"
+      
+      sonaraube.vm.provider "vmware_desktop" do |v|
+        v.memory = 4096
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Add any specific provisioning for sonaraube-vm here if needed
+      # sonaraube.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+
+    # Fourth VM - splunk-vm
+    config.vm.define "splunk-vm" do |splunk|
+      splunk.vm.box = "bento/ubuntu-22.04"
+      splunk.vm.hostname = "splunk-vm"
+      
+      splunk.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048 # 2GB
+        v.cpus = 4
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Add any specific provisioning for splunk-vm here if needed
+      # splunk.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+
+    # Fifth VM - nexus-vm
+    config.vm.define "nexus-vm" do |nexus|
+      nexus.vm.box = "bento/ubuntu-22.04"
+      nexus.vm.hostname = "nexus-vm"
+      
+      nexus.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 4
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      # Add any specific provisioning for nexus-vm here if needed
+      # nexus.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+  end

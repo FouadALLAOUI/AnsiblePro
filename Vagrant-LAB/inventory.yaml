@@ -1,0 +1,26 @@
+all:
+  hosts:
+    vmstation:
+      ansible_host: 192.168.44.129
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    jenkins-vm:
+      ansible_host: 192.168.44.130
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    splunk-vm:
+      ansible_host: 192.168.44.131
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    nexus-vm:
+      ansible_host: 192.168.44.133
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

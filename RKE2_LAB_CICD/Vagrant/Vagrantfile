@@ -1,0 +1,103 @@
+Vagrant.configure("2") do |config|
+  
+    # First VM - ubuntu-vm
+    config.vm.define "ansible-master" do |ansible_master|
+      ansible_master.vm.box = "bento/ubuntu-22.04"
+      ansible_master.vm.hostname = "ansible-master"
+      
+      ansible_master.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Provision script to install Ansible
+      ansible_master.vm.provision "shell", inline: <<-SHELL
+        apt update
+        apt install ansible -y
+      SHELL
+    end
+    
+    # Second VM - jenkins-vm
+    config.vm.define "jenkins-vm" do |jenkins|
+      jenkins.vm.box = "bento/ubuntu-22.04"
+      jenkins.vm.hostname = "jenkins-vm"
+      
+      jenkins.vm.provider "vmware_desktop" do |v|
+        v.memory = 4096
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      
+      # Add any specific provisioning for jenkins-vm here if needed
+      # jenkins.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+    
+    # Third VM - nexus-vm
+    config.vm.define "nexus-vm" do |nexus|
+      nexus.vm.box = "bento/ubuntu-22.04"
+      nexus.vm.hostname = "nexus-vm"
+      
+      nexus.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 4
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      # Add any specific provisioning for nexus-vm here if needed
+      # nexus.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+    
+    # Fourth VM - sonarqube-vm
+    config.vm.define "sonarqube-vm" do |sonarqube|
+      sonarqube.vm.box = "bento/ubuntu-22.04"
+      sonarqube.vm.hostname = "sonarqube-vm"
+      
+      sonarqube.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 4
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+    end
+
+    # Fifth VM - PostgreSQL-vm
+    config.vm.define "postgresql-vm" do |postgresql|
+      postgresql.vm.box = "bento/ubuntu-22.04"
+      postgresql.vm.hostname = "postgresql-vm"
+      
+      postgresql.vm.provider "vmware_desktop" do |v|
+        v.memory = 2048
+        v.cpus = 2
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      # Add any specific provisioning for postgresql-vm here if needed
+      # postgresql.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+
+    # Sixth VM - Rancher-vm
+    config.vm.define "rancher-vm" do |rancher|
+      rancher.vm.box = "bento/ubuntu-22.04"
+      rancher.vm.hostname = "rancher-vm"
+      
+      rancher.vm.provider "vmware_desktop" do |v|
+        v.memory = 4096
+        v.cpus = 4
+        v.gui = true
+        v.vmx["virtualHW.version"] = "19"
+      end
+      # Add any specific provisioning for rancher-vm here if needed
+      # rancher.vm.provision "shell", inline: <<-SHELL
+      #   apt update
+      # SHELL
+    end
+  end

@@ -1,0 +1,170 @@
+---
+- name: Deploy PostgreSQL and pgAdmin using Docker
+  hosts: postgresql-vm
+  become: yes
+  become_method: sudo
+
+  vars:
+    postgres_password: "password"
+    pgadmin_email: "admin@admin.com"
+    pgadmin_password: "admin"
+
+  tasks:
+    - name: Create PostgreSQL parent data directory
+      file:
+        path: /var/lib/postgresql
+        state: directory
+        owner: 999
+        group: 999
+        mode: '0755'
+
+    - name: Create pgAdmin data directory
+      file:
+        path: /var/lib/pgadmin
+        state: directory
+        owner: 5050      # pgAdmin container runs as UID 5050
+        group: 5050
+        mode: '0755'
+
+    - name: Create Docker network for PostgreSQL and pgAdmin
+      docker_network:
+        name: pg_network
+        state: present
+
+    - name: Remove old PostgreSQL container
+      docker_container:
+        name: postgresql
+        state: absent
+
+    - name: Remove old pgAdmin container
+      docker_container:
+        name: pgadmin
+        state: absent
+
+    - name: Pull PostgreSQL Docker image
+      docker_image:
+        name: postgres
+        tag: latest
+        source: pull
+
+    - name: Pull pgAdmin Docker image
+      docker_image:
+        name: dpage/pgadmin4
+        tag: latest
+        source: pull
+
+    - name: Run PostgreSQL container
+      docker_container:
+        name: postgresql
+        image: postgres:latest
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "5432:5432"
+        volumes:
+          - /var/lib/postgresql:/var/lib/postgresql
+        networks:
+          - name: pg_network
+        env:
+          POSTGRES_PASSWORD: "{{ postgres_password }}"
+      register: postgresql_container_status
+
+    - name: Run pgAdmin container
+      docker_container:
+        name: pgadmin
+        image: dpage/pgadmin4:latest
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "8080:80"           # Access pgAdmin at http://<vm-ip>:8080
+        volumes:
+          - /var/lib/pgadmin:/var/lib/pgadmin
+        networks:
+          - name: pg_network
+        env:
+          PGADMIN_DEFAULT_EMAIL: "{{ pgadmin_email }}"
+          PGADMIN_DEFAULT_PASSWORD: "{{ pgadmin_password }}"
+      register: pgadmin_container_status
+
+    - name: Wait for PostgreSQL to be ready
+      wait_for:
+        host: localhost
+        port: 5432
+        delay: 5
+        timeout: 300
+
+    - name: Wait for pgAdmin to be ready
+      wait_for:
+        host: localhost
+        port: 8080
+        delay: 5
+        timeout: 300
+
+    - name: Display access information
+      debug:
+        msg:
+          - "pgAdmin UI:        http://{{ ansible_host }}:8080"
+          - "pgAdmin login:     {{ pgadmin_email }} / {{ pgadmin_password }}"
+          - "--- Add a server in pgAdmin with these details ---"
+          - "Host:              postgresql   (container name on shared network)"
+          - "Port:              5432"
+          - "Username:          postgres"
+          - "Password:          {{ postgres_password }}"
+      when: postgresql_container_status is success and pgadmin_container_status is success
+
+
+
+
+
+#---
+#- name: Deploy PostgreSQL using Docker
+#  hosts: postgresql-vm
+#  become: yes
+#  become_method: sudo
+#
+#  vars:
+#    postgres_password: "password"
+#
+#  tasks:
+#    - name: Create PostgreSQL data directory
+#      file:
+#        path: /var/lib/postgresql/data
+#        state: directory
+#        owner: 1000
+#        group: 1000
+#        mode: '0755'
+#
+#    - name: Pull PostgreSQL Docker image
+#      docker_image:
+#        name: postgres
+#        tag: latest
+#        source: pull
+#
+#    - name: Run PostgreSQL container
+#      docker_container:
+#        name: postgresql
+#        image: postgres:latest
+#        state: started
+#        restart_policy: unless-stopped
+#        published_ports:
+#          - "5432:5432"
+#        volumes:
+#          - /var/lib/postgresql/data:/var/lib/postgresql/data
+#        env:
+#          POSTGRES_PASSWORD: "{{ postgres_password }}"
+#      register: postgresql_container_status  # ✅ Moved to task level
+#
+#    - name: Wait for PostgreSQL to be ready
+#      wait_for:                              # ✅ TCP check instead of HTTP
+#        host: localhost
+#        port: 5432
+#        delay: 5
+#        timeout: 300
+#
+#    - name: Display PostgreSQL access information
+#      debug:
+#        msg:
+#          - "PostgreSQL is running at {{ ansible_host }}:5432"
+#          - "Username: postgres"
+#          - "Password: {{ postgres_password }}"
+#      when: postgresql_container_status is success  # ✅ Correct test syntax

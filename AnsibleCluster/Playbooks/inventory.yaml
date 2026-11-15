@@ -1,0 +1,29 @@
+ubuntu:
+  hosts:
+    agent-ubuntu-vm:
+      ansible_host: 192.168.44.122
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+centos:
+  hosts:
+    agent-centos-vm:
+      ansible_host: 192.168.44.121
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      
+redhat:
+  hosts:
+    agent-redhat-vm:
+      ansible_host: 192.168.44.120
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+
+

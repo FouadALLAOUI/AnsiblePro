@@ -1,0 +1,150 @@
+---
+- name: Install wget and curl on target hosts
+  hosts: all
+  become: yes
+  become_method: sudo
+  
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      
+    - name: Install wget
+      apt:
+        name: wget
+        state: present
+
+    - name: Install net-tools
+      apt:
+        name: net-tools
+        state: present
+
+    - name: Install iputils-ping
+      apt:
+        name: iputils-ping
+        state: present
+        
+    - name: Install curl
+      apt:
+        name: curl
+        state: present
+        
+    - name: Verify wget installation
+      command: wget --version
+      register: wget_version
+      changed_when: false
+      
+    - name: Verify curl installation
+      command: curl --version
+      register: curl_version
+      changed_when: false
+      
+    - name: Display wget version
+      debug:
+        msg: "{{ wget_version.stdout_lines[0] }}"
+        
+    - name: Display curl version
+      debug:
+        msg: "{{ curl_version.stdout_lines[0] }}"
+  
+   #########################################################################################
+   # Docker installation
+   #########################################################################################
+  
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+    
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+        state: present
+    
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+    
+    - name: Update apt cache after adding repository
+      apt:
+        update_cache: yes
+    
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+    
+    - name: Ensure Docker service is started and enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    
+    - name: Install Docker Python SDK
+      pip:
+        name: docker
+        state: present
+        executable: pip3
+    
+    - name: Add vagrant user to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+    
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+    
+    - name: Display Docker version
+      debug:
+        msg: "{{ docker_version.stdout }}"
+    
+    - name: Test Docker with hello-world
+      docker_container:
+        name: hello-world-test
+        image: hello-world
+        state: started
+        detach: no
+        cleanup: yes
+      register: hello_world_output
+      ignore_errors: yes
+    
+    - name: Display test result
+      debug:
+        msg: "Docker is working correctly!"
+      when: hello_world_output is succeeded
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Verify Docker Compose installation
+      command: docker-compose --version
+      register: docker_compose_version
+      changed_when: false
+    
+    - name: Display Docker Compose version
+      debug:
+        msg: "{{ docker_compose_version.stdout }}"
+
+

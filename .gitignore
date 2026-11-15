@@ -1,0 +1,81 @@
+# ============================================================
+# Vagrant / VMware
+# ============================================================
+# Per-project VM state: disks (.vmdk), private SSH keys, machine IDs, logs
+.vagrant/
+*.box
+*.vmdk
+*.vmx
+*.vmxf
+*.vmsd
+*.nvram
+*.scoreboard
+*.vmem
+*.vmss
+*.lck/
+vmware*.log
+
+# ============================================================
+# Ansible
+# ============================================================
+*.retry
+.ansible/
+ansible.log
+fact_cache/
+# Vault password files (never commit these)
+.vault_pass
+.vault_pass.txt
+*.vault_pass
+vault_password*
+
+# ============================================================
+# Kubernetes
+# ============================================================
+kubeconfig
+*.kubeconfig
+rke2.yaml
+k3s.yaml
+# Real secrets — keep committing the templated secret.yaml only
+*-secret.local.yaml
+secrets.local.yaml
+
+# ============================================================
+# Node.js (microservices)
+# ============================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+coverage/
+dist/
+build/
+
+# ============================================================
+# Environment & credentials
+# ============================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# ============================================================
+# Logs & temp files
+# ============================================================
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# ============================================================
+# OS / Editors
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

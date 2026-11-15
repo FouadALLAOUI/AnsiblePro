@@ -1,0 +1,68 @@
+---
+- name: Deploy Splunk using Docker
+  hosts: splunk-vm
+  become: yes
+  become_method: sudo
+  
+  vars:
+    splunk_password: "YourSecurePassword123!"
+  
+  tasks:
+    - name: Create Splunk data directory
+      file:
+        path: /opt/splunk/var
+        state: directory
+        mode: '0755'
+    
+    - name: Pull Splunk Docker image
+      docker_image:
+        name: splunk/splunk
+        tag: latest
+        source: pull
+    
+    - name: Run Splunk container
+      docker_container:
+        name: splunk
+        image: splunk/splunk:latest
+        state: started
+        restart_policy: unless-stopped
+        published_ports:
+          - "8000:8000"
+          - "8088:8088"
+          - "8089:8089"
+          - "9997:9997"
+        volumes:
+          - /opt/splunk/var:/opt/splunk/var
+          - /opt/splunk/etc:/opt/splunk/etc
+        env:
+          SPLUNK_PASSWORD: "{{ splunk_password }}"
+          SPLUNK_START_ARGS: "--accept-license"
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8000"]
+          interval: 30s
+          timeout: 10s
+          retries: 5
+          start_period: 5m
+      register: splunk_container_status
+      
+    - name: Wait for Splunk to be ready (may take 3-5 minutes)
+      uri:
+        url: http://localhost:8000
+        status_code: 200
+        validate_certs: no
+      register: result
+      until: result.status == 200
+      retries: 60
+      delay: 10
+      ignore_errors: yes
+    
+    - name: Display Splunk access information
+      debug:
+        msg:
+          - "Splunk is running at http://{{ ansible_host }}:8000"
+          - "Username: admin"
+          - "Password: {{ splunk_password }}"
+          - "Note: Splunk may take 3-5 minutes to fully initialize"
+      when: splunk_container_status is succeeded
+
+      

@@ -1,0 +1,58 @@
+all:
+  hosts:
+    ansible-master:
+      ansible_host: 192.168.44.134
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      
+    jenkins-vm:
+      ansible_host: 192.168.44.135
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+    nexus-vm:
+      ansible_host: 192.168.44.136
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+    sonarqube-vm:
+      ansible_host: 192.168.44.137
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+    postgresql-vm:
+      ansible_host: 192.168.44.138
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+    rancher-vm:
+      ansible_host: 192.168.44.139
+      ansible_user: vagrant
+      ansible_password: vagrant
+      ansible_connection: ssh
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
